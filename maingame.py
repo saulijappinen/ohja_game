@@ -6,6 +6,9 @@ from random import randint
 # load resources
 
 # 1 Define classes 
+# - classes: robot, monster, cause they both move
+# - just appear: coins. and door?  
+
 
 class Robot: 
     def __init__(self, x: int, y:int):
@@ -28,6 +31,28 @@ class Robot:
     def move_down(self, step = int):
         self.y += step
 
+class Monster: 
+    def __init__(self, x: int, y:int):
+        self.x = x
+        self.y = y
+        self.pic = pygame.image.load("./resources/hirvio.png")
+ 
+    def draw(self, naytto):
+        naytto.blit(self.pic, (self.x, self.y))        
+ 
+    def move_rigth(self, step = int):
+        self.x += step
+ 
+    def move_left(self, step = int):
+        self.x -= step
+ 
+    def move_up(self, step = int):
+        self.y -= step
+ 
+    def move_down(self, step = int):
+        self.y += step
+
+
 
 # pelin aloitus ja näytön speksaus
  
@@ -43,7 +68,7 @@ clock = pygame.time.Clock()
 # parametrit 
  
 rate_fps = 60
-rate_movement = 1 
+
 
 
 # objects
@@ -52,20 +77,25 @@ w = randint(0, w_screen-100)
 h = randint(0, h_screen-100)
 
 object_robo = Robot(w, h)
+rate_movement_robo = 1 
 
 rigth = False
 left = False
 up = False
 down = False
 
+object_monster = Monster(500, 500)
+
+
 
 # game 
 
 while True:
  
-    naytto.fill((0, 0, 0))
+    naytto.fill((255, 255, 255))
  
     object_robo.draw(naytto)
+    object_monster.draw(naytto)
  
     for tapahtuma in pygame.event.get():
  
@@ -120,13 +150,13 @@ while True:
     # liikkumisen määrät 
  
     if rigth:
-        object_robo.move_rigth(rate_movement) 
+        object_robo.move_rigth(rate_movement_robo) 
     if left:
-        object_robo.move_left(rate_movement) 
+        object_robo.move_left(rate_movement_robo) 
     if up:
-        object_robo.move_up(rate_movement) 
+        object_robo.move_up(rate_movement_robo) 
     if down:
-        object_robo.move_down(rate_movement) 
+        object_robo.move_down(rate_movement_robo) 
     
  
     # yhteiset 
