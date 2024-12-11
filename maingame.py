@@ -134,7 +134,7 @@ door_center_y = door_y + door.get_height()/2
 # first values: 
 
 point_counter = 0 
-point_max_points = 10
+point_max_points = 3
 
 game_finalized = False
 

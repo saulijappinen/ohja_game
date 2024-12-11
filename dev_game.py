@@ -3,14 +3,11 @@
 import pygame
 from random import randint
 from random import choice
-from time import time 
+#from time import time 
 
 # load resources
 
 # 1 Define classes 
-# - classes: robot, monster, cause they both move
-# - just appear: coins. and door?  
-
 
 class Robot: 
     def __init__(self, x: int, y:int):
@@ -23,8 +20,8 @@ class Robot:
         self.center_x = self.x + self.width/2 
         self.center_y = self.y + self.heigth/2 
  
-    def draw(self, naytto):
-        naytto.blit(self.pic, (self.x, self.y))        
+    def draw(self, screen):
+        screen.blit(self.pic, (self.x, self.y))        
  
     def move_rigth(self, step = int):
         self.x += step
@@ -46,41 +43,82 @@ class Monster:
         # which direction is running 
         self.direction = direction
  
-    def draw(self, naytto):
-        naytto.blit(self.pic, (self.x, self.y))        
- 
+    def draw(self, screen):
+        screen.blit(self.pic, (self.x, self.y))        
 
-# pelin aloitus ja näytön speksaus
+class Door: 
+    def __init__(self):
+        self.pic = pygame.image.load("./resources/ovi.png")
+        # for plotting
+        self.width = pygame.image.load("./resources/ovi.png").get_width()
+        self.heigth = pygame.image.load("./resources/ovi.png").get_height()
+        # using global parameters here, don't know if wise cause these have to be defined before door
+        self.x = randint(int(object_robo.width/2), int(w_screen - self.width))
+        self.y = randint(h_upper_banner, int(h_screen - self.heigth))
+        self.x_center = self.x + self.width/2 
+        self.y_center = self.y + self.heigth/2 
  
-pygame.init()
+    def draw(self, screen):
+        screen.blit(self.pic, (self.x, self.y))   
 
-start_time = time()
+
+# Functions
+
+def init_screen(width, height):
+    pygame.init()
+    screen = pygame.display.set_mode((width,height))
+    # default color = white / somehow bugs the colors, fill now in while loop stil...
+    #screen.fill((0, 0, 0))
+    return screen
+
+
+# PART 0: init screen 
 
 w_screen = 800
 h_screen = 600
+
+screen = init_screen(w_screen, h_screen)
+
+
+
+
+# PART 1: set game universal parameters first:  
+
+game_name = "Robot Coin Hunt"
  
-naytto = pygame.display.set_mode((w_screen, h_screen))
-pygame.display.set_caption("Robot Coin Rally")
- 
+pygame.display.set_caption(game_name)
+
 clock = pygame.time.Clock()
- 
-# parametrit 
- 
+
 rate_fps = 60
 
+point_max_points = 2
+
+## how close to get to coins, monsters (abs)
+encounter_limit = 10
 
 
-# objects
+# PART 2: Text parameters 
+
+font = pygame.font.SysFont("Georgia", 20)
 
 ## upper banner height / for txt
 h_upper_banner = 35
+
+plain_text_monster = "Oh no! A monster stole your coin and possibly slowed you down!"
+plain_text_end_time = "Wuhuu! You mastered the game in"
+plain_text_monster_counter = "Scary monsters encountered during coin hunt:" 
+
+# PART 3: Game objects 
+
+## 3.1 Robot 
 
 # robot to the upper left corner always at start
 # w = randint(10, w_screen-100)
 # h = randint(h_upper_banner, h_screen-100)
 
 object_robo = Robot(0, h_upper_banner)
-rate_movement_robo = 1 
+rate_movement_robo = 2 
 
 rigth = False
 left = False
@@ -88,13 +126,14 @@ up = False
 down = False
 
 
-## monsters ---- 
+## 3.2 Monsters 
 
 w_monster = pygame.image.load("./resources/hirvio.png").get_width()
 h_monster = pygame.image.load("./resources/hirvio.png").get_height()
 
-list_monsters = [] # this list works, just need to get directions working for these 
-for _ in range(6): # every second point from 1 onwards  
+list_monsters = [] # list for all the monsters; a separate list for those already plotted in screen based on points
+
+for _ in range(6): # 
     # not in the 0,0 corner where robot reborns 
     x_mon = randint(int(object_robo.width/2), int(w_screen - w_monster - 10))
     y_mon = choice([h_upper_banner + 5, (h_screen - h_monster)]) # can only be plotted at first to upper/lower side
@@ -105,75 +144,96 @@ for _ in range(6): # every second point from 1 onwards
     monster = Monster(x_mon, y_mon, direction)
     list_monsters.append(monster)
 
-print(list_monsters)
 
 #object_monster = Monster(500, 100)
 #object_monster = list_monsters[2]
 
-monster_dir = "down"
-
+## 3.3 Coins
 
 coin = pygame.image.load("./resources/kolikko.png")
 
 # x_coin = randint(0, 300)
 # y_coin = randint(0, 400)
 
-x_coin = 300
-y_coin = 400
+# coins not too near borders so robo can reach
+x_coin = randint(10, w_screen - coin.get_width() - 15)
+y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
 
-# for plotting / could also be just the center that should be hit?
-# coin_rigth_border = x_coin + coin.get_width()
-# coin_down_border = y_coin + coin.get_height()
+# for plotting 
 coin_center_x = x_coin + coin.get_width()/2
 coin_center_y = y_coin + coin.get_height()/2
 
 
-door = pygame.image.load("./resources/ovi.png")
-# door_x = w_screen-100
-# door_y = h_screen-100
-door_x = randint(int(object_robo.width/2), int(w_screen - door.get_width()/2))
-door_y = randint(h_upper_banner, int(h_screen - door.get_height()/2))
+## 3.4 Door 
 
-door_center_x = door_x + door.get_width()/2
-door_center_y = door_y + door.get_height()/2
+# door = pygame.image.load("./resources/ovi.png")
+# # door_x = w_screen-100
+# # door_y = h_screen-100
+# # door random aswell
+# door_x = randint(int(object_robo.width/2), int(w_screen - door.get_width()))
+# door_y = randint(h_upper_banner, int(h_screen - door.get_height()))
+
+# # center for deciding if robot near enough
+# door_center_x = door_x + door.get_width()/2
+# door_center_y = door_y + door.get_height()/2
+
+object_door = Door() # randomized coord inside class
 
 
 
-# first values: 
+# Part 4: Constant parameters 
 
-point_counter = 0 
-point_max_points = 10
-
+## game status
 game_finalized = False
 
-# texts
+## counters 
+point_counter = 0 # should be flexible 1-10
+monster_counter = 0
 
-font = pygame.font.SysFont("Georgia", 20)
-text_coin_found = font.render("Coin found, you are a rich robot!", True, (255, 0, 0))
 
-# time
+## time
 #start_time = pygame.time.get_ticks()
 elapsed_time = 0
 
 
-encounter_limit = 10
-# game 
-
-# Alustaa pelin
-# scr = init() 
 timer = pygame.time.Clock()
 # sys time and sys.time - start time and this would be visible 
 
 
+# time vars
+start_time = pygame.time.get_ticks()
+elapsed_time = 0
+game_finalized_time = 0
 
+
+# functions: 
+
+# def check_coin_encounter(point_counter = point_counter, point_max_points = point_max_points, robot = object_robo, encounter_limit = encounter_limit):
+#     if point_counter <= int(point_max_points - 1) and abs(robot.x + robot.width/2 - coin_center_x) <= encounter_limit and abs(robot.y + robot.heigth/2 - coin_center_y)  <= encounter_limit:
+#         # screen.blit(text_coin_found, (200, h_screen/3))
+#         # pygame.display.flip() # update so that text is showing
+#         # pygame.time.wait(1000) # 
+#         point_counter += 1
+#         x_coin = randint(10, w_screen - coin.get_width() - 15)
+#         y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
+#         # speed increase to 2
+#         if rate_movement_robo == 1:
+#             rate_movement_robo = 2
+#         print("coin found")
+
+
+
+
+# GAME LOOP: 
 
 while True:
 
     print("taas alkoi pelikierros")
     print(len(list_monsters))
-    naytto.fill((255, 255, 255))
+    screen.fill((255, 255, 255))
  
-    object_robo.draw(naytto)
+    # robo to screen
+    object_robo.draw(screen)
 
 
     # plotted monsters 
@@ -186,7 +246,7 @@ while True:
     elif point_counter <= 2:
         list_monsters_plotted.append(list_monsters[0])
         list_monsters_plotted.append(list_monsters[1])
-    #     list_monsters[0].draw(naytto)
+    #     list_monsters[0].draw(screen)
     elif point_counter >= 3 and point_counter < 5: # those added before are already on the list
         list_monsters_plotted.append(list_monsters[0])
         list_monsters_plotted.append(list_monsters[1])
@@ -202,11 +262,11 @@ while True:
         list_monsters_plotted.append(list_monsters[2])
         list_monsters_plotted.append(list_monsters[3])
         list_monsters_plotted.append(list_monsters[4])
-    #     list_monsters[0].draw(naytto)
-    #     list_monsters[1].draw(naytto)
-    #     list_monsters[2].draw(naytto)
-    #     list_monsters[3].draw(naytto)
-    #     list_monsters[4].draw(naytto)
+    #     list_monsters[0].draw(screen)
+    #     list_monsters[1].draw(screen)
+    #     list_monsters[2].draw(screen)
+    #     list_monsters[3].draw(screen)
+    #     list_monsters[4].draw(screen)
     elif point_counter >= 9:
         list_monsters_plotted.append(list_monsters[0])
         list_monsters_plotted.append(list_monsters[1])
@@ -214,23 +274,15 @@ while True:
         list_monsters_plotted.append(list_monsters[3])
         list_monsters_plotted.append(list_monsters[4])
         list_monsters_plotted.append(list_monsters[5])
-    #     list_monsters[0].draw(naytto)
-    #     list_monsters[1].draw(naytto)
-    #     list_monsters[2].draw(naytto)
-    #     list_monsters[3].draw(naytto)
-    #     list_monsters[4].draw(naytto)
-    #     list_monsters[5].draw(naytto)
+    #     list_monsters[0].draw(screen)
+    #     list_monsters[1].draw(screen)
+    #     list_monsters[2].draw(screen)
+    #     list_monsters[3].draw(screen)
+    #     list_monsters[4].draw(screen)
+    #     list_monsters[5].draw(screen)
 
     for mon in list_monsters_plotted:
-        mon.draw(naytto)
-
-
-    # 0-2: 1 monsteri jonka nopeus kasvaa
-    # 3: 2 monsteria 
-    # 5: 3 monsteria
-    # 7: 4 monsteria
-    # 9: 5 mons
-    # 10: 6 mons    
+        mon.draw(screen)   
 
     # robot's outer limits 
     robot_border_right = object_robo.x + object_robo.width
@@ -240,54 +292,44 @@ while True:
 
     # where to draw coins 
     if point_counter <= int(point_max_points - 1):
-        naytto.blit(coin, (x_coin, y_coin))
+        screen.blit(coin, (x_coin, y_coin))
         coin_center_x = x_coin + coin.get_width()/2
         coin_center_y = y_coin + coin.get_height()/2
-
-    # Upper bar: point counter, time counter // could be converted to a surface? 
-    pygame.draw.line(naytto, (0, 0, 0), (0,h_upper_banner), (w_screen, h_upper_banner), 2)
-    # - point counter
-    text_point_counter = font.render(f"Coins collected: {point_counter}", True, (0, 0, 0))
-    naytto.blit(text_point_counter, (25, 5))
-    # - game time: 
-    gametime = int(pygame.time.get_ticks() / 1000) # ms -> s
-    text_timer = font.render(f"Seconds played: {gametime}", True, (0, 0, 0))
-    naytto.blit(text_timer, (275, 5))
-    # speed 
-    text_robo_speed = font.render(f"Robo speed: {rate_movement_robo}", True, (0, 0, 0))
-    naytto.blit(text_robo_speed, (550, 5))
-
 
 
 
     # help prints to developer 
     for mon in list_monsters: print(mon.x, mon.y, mon.direction)
-    print("door location", door_center_x, door_center_y)
+    print("door location", object_door.x_center, object_door.y_center)
     print("robo is in location", object_robo.x, object_robo.y, "and its borders are", robot_border_right, robot_border_down)
     print("robo center", object_robo.x + object_robo.width/2, object_robo.y + object_robo.heigth/2)
     print("coin center", coin_center_x, coin_center_y)
     #print("monster location", object_monster.x, object_monster.y, "and center", object_monster.x + w_monster/2, object_monster.y + h_monster/2)
 
     # Coin found 
+    # check_coin_encounter()
     # - 3 coord points offset ok from center 
     if point_counter <= int(point_max_points - 1) and abs(object_robo.x + object_robo.width/2 - coin_center_x) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - coin_center_y)  <= encounter_limit:
-        naytto.blit(text_coin_found, (w_screen/2, 100))
+        # screen.blit(text_coin_found, (200, h_screen/3))
+        # pygame.display.flip() # update so that text is showing
+        # pygame.time.wait(1000) # 
         point_counter += 1
         x_coin = randint(10, w_screen - coin.get_width() - 15)
         y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
+        # speed increase to 2
         if rate_movement_robo == 1:
             rate_movement_robo = 2
 
-    # Final coin collected, show door 
+    # Final coin collected, draw door object  
     if point_counter == int(point_max_points):
-        naytto.blit(door, (door_x, door_y))
+        object_door.draw(screen)
 
 
     # Enter the door / only when point_conter is max points!
-    if point_counter == point_max_points and abs(point_counter == point_max_points and object_robo.x + object_robo.width/2 - door_center_x) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - door_center_y)  <= encounter_limit:
+    if point_counter == point_max_points and abs(point_counter == point_max_points and object_robo.x + object_robo.width/2 - object_door.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_door.y_center)  <= encounter_limit:
         # stop all movement
+        game_finalized_time = pygame.time.get_ticks() - start_time
         game_finalized = True 
-        end_time = time()
 
 
     # Monster encounter 
@@ -296,11 +338,13 @@ while True:
         
         if abs(object_robo.x + object_robo.width/2 - (mon.x + w_monster/2)) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - (mon.y + h_monster/2)) <= encounter_limit:
             print("monster encountered!")
-            text_monster = font.render(f"Oh no, unfriendly monster took your coin!", True, (255, 0, 0))
-            naytto.blit(text_monster, (150, h_screen/2))
-            pygame.time.wait(500) # 
+            text_monster = font.render(plain_text_monster, True, (255, 0, 0))
+            screen.blit(text_monster, (90, h_screen/3))
+            pygame.display.flip() # update so that text is showing
+            pygame.time.wait(2000) # 
             # robot appears in upper corner 
             object_robo = Robot(0, h_upper_banner + 5)
+            monster_counter += 1
             if point_counter >= 1: 
                 point_counter -= 1
             else: 
@@ -308,19 +352,46 @@ while True:
             # decrease speed
             if rate_movement_robo == 2:
                 rate_movement_robo = 1
+            
         
 
     # game end 
-    if game_finalized:
-        elapsed_time = end_time - start_time ## FIXME!
-        text_end = font.render(f"Wuhuu, you finalized the game in: {elapsed_time} seconds", True, (255, 0, 0))
-        naytto.blit(text_end, (150, h_screen/2))
+    # if game_finalized:
+    #     current_time = pygame.time.get_ticks()
+    #     elapsed_time = current_time - start_time
+    #     text_end = font.render(f"Wuhuu, you finalized the game in: {elapsed_time} seconds", True, (255, 0, 0))
+    #     screen.blit(text_end, (150, h_screen/2))
 
+
+        # prints on the screen depending on the game
+
+    if game_finalized == False: 
+        # Upper bar: point counter, time counter // could be converted to a surface? 
+        pygame.draw.line(screen, (0, 0, 0), (0,h_upper_banner), (w_screen, h_upper_banner), 2)
+        # - point counter
+        text_point_counter = font.render(f"Coins collected: {point_counter}", True, (0, 0, 0))
+        screen.blit(text_point_counter, (25, 5))
+        # - game time: 
+        current_time = pygame.time.get_ticks()
+        gametime = int((current_time - start_time)/1000)
+        #gametime = int(pygame.time.get_ticks() / 1000)
+        text_timer = font.render(f"Seconds played: {gametime}", True, (0, 0, 0))
+        screen.blit(text_timer, (275, 5))
+        # speed 
+        text_robo_speed = font.render(f"Robo speed: {rate_movement_robo}", True, (0, 0, 0))
+        screen.blit(text_robo_speed, (550, 5))
+         
 
     for tapahtuma in pygame.event.get():
+
+        # global events
+        if tapahtuma.type == pygame.QUIT:
+            exit()
+
+        if game_finalized: 
+            game_finalized_time = pygame.time.get_ticks() - start_time
  
         # Robo movement 
-        
         if tapahtuma.type == pygame.KEYDOWN:
             
             if tapahtuma.key == pygame.K_LEFT:
@@ -366,8 +437,7 @@ while True:
         #     print_text = True
  
     # yhteinen exit
-        if tapahtuma.type == pygame.QUIT:
-            exit()
+
  
     # Movement if game is not finalized
 
@@ -403,10 +473,15 @@ while True:
                 mon.y -= monster_speed
 
  
-    # yhteiset 
-    # if print_text:
-    #     naytto.blit(teksti, (200, 50))
- 
+    if game_finalized:
+        # current_time = pygame.time.get_ticks()
+        # elapsed_time = current_time - start_time
+        #elapsed_time = round(float(pygame.time.get_ticks()/1000), 1) 
+        text_end = font.render(f"{plain_text_end_time} {game_finalized_time} seconds", True, (255, 0, 0))
+        screen.blit(text_end, (150, h_screen/3))
+        text_monsters_encountered = font.render(f"{plain_text_monster_counter} {monster_counter}", True, (255, 0, 0))
+        screen.blit(text_monsters_encountered, (150, h_screen/3 + 25))
+    
     # asiat peliin 
     pygame.display.flip()
  

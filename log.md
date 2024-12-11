@@ -7,9 +7,16 @@
 
 V3 to master published. 
 
-Work to do 
-- print speed
-- if encounter, change movement speed 
+V4 to some point
+- parameters in front
+- changed door to own class, don't know really if it's wise but a little less global parameters now 
+  - could do this for robo movement speed also!!
+  - could do this for coin also? 
+- init_screen function works for creating screen object but didn't get check_coin_encounter to work... 
+  - maybe something more simple?
+- final time still not working - if not, then freeze screen for ten secs TMP solution?  
+- TODO
+  - can i get encounter coin / encounter monster to work (ref. starship and bullets)
 
 **9.12.**
 
