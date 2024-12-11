@@ -3,13 +3,29 @@
 
 
 
+**11.12.**
+
+V3 to master published. 
+
+Work to do 
+- print speed
+- if encounter, change movement speed 
+
 **9.12.**
 
 V2 to master published. 
 
 V3: could do so that one monster increases speed until 3 coins, then more monsters appear
-- if monster has value of direction, those could be randomized? or every other lengthwise, every other heighwise? 
+- if monster has a value of direction, those could be randomized? or every other lengthwise, every other heighwise? 
 - if monster is encountered, reduce one coin and move to 0,0 (where no mosters can be created?) 
+  - priority is to get this working! 
+
+Did get monster encounter working for one monster and list multiple monsters. 
+- continue by triyng to plot one monster per additional point and worry about moving them afterwards? 
+- or by trying to for loop the movement pattern
+- or by revising piirileikki / robots from sky 
+
+A secret spot that enhances the speed to max 2? 
 
 **6.12.**
 

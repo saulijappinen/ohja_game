@@ -8,6 +8,8 @@ See: <https://ohjelmointi-24.mooc.fi/osa-14>
 
 ## Version releases 
 
+* v3: previous functionalities + monsters and monster encounter working + speed changes based on coins/monsters. 
+
 * v2: working version so that you can collect points and game ends when door is reached. Monsters not included (one is just moving with no effect)
 + [x] walls are barriers
 + [x] outfit: game window caption, points and timer separated from game 
