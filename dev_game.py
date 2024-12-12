@@ -99,7 +99,7 @@ w_screen = 800
 h_screen = 600
 
 screen = init_screen(w_screen, h_screen)
-
+# start_time = pygame.time.get_ticks()
 
 
 
@@ -129,6 +129,7 @@ h_upper_banner = 35
 plain_text_monster = "Oh no! A monster stole one coin and slowed you down!"
 plain_text_end_time = "Wuhuu! You mastered the game in"
 plain_text_monster_counter = "Scary monsters encountered during coin hunt:" 
+plain_text_game_exit = "The game will now close, come again!"
 
 # PART 3: Game objects 
 
@@ -217,7 +218,7 @@ monster_counter = 0
 
 
 ## time
-#start_time = pygame.time.get_ticks()
+start_time = pygame.time.get_ticks()
 elapsed_time = 0
 
 
@@ -228,9 +229,9 @@ elapsed_time = 0
 # time vars
 
 #timer = pygame.time.Clock()
-start_time = pygame.time.get_ticks()
+
 elapsed_time = 0
-#game_finalized_time = 0
+game_finalized_time = 0
 
 
 # functions: 
@@ -393,6 +394,7 @@ while True:
         # current_time = timer.get_time() # time in milli seconds
         # game_finalized_time = current_time - start_time 
         #game_finalized_time = pygame.time.get_ticks() - start_time
+        elapsed_time = pygame.time.get_ticks() - start_time
         game_finalized = True 
 
     
@@ -509,17 +511,20 @@ while True:
  
     if game_finalized:
         #print("game finalize timer is", timer.get_time())
-        current_time = pygame.time.get_ticks()
-        game_finalized_time = round(float((current_time - start_time)/1000), 1) 
+        #current_time = pygame.time.get_ticks()
+        #game_finalized_time = round(float((current_time - start_time)/1000), 1) 
         #game_finalized_time = round(float(current_time / -100), 1)
         #elapsed_time = round(float(pygame.time.get_ticks()/1000), 1) 
-        text_end = font.render(f"{plain_text_end_time} {game_finalized_time} seconds", True, (255, 0, 0))
+        text_end = font.render(f"{plain_text_end_time} {round(float(elapsed_time / 1000), 1)} seconds", True, (255, 0, 0))
         screen.blit(text_end, (150, h_screen/3))
         text_monsters_encountered = font.render(f"{plain_text_monster_counter} {monster_counter}", True, (255, 0, 0))
         screen.blit(text_monsters_encountered, (150, h_screen/3 + 25))
+        text_exit = font.render(f"{plain_text_game_exit}", True, (255, 0, 0))
+        screen.blit(text_exit, (150, h_screen/3 + 50))
         # doing this in insane way because couldn't find a solution to stop the time from continuing to run
         pygame.display.flip() # update so that text is showing
         pygame.time.wait(5000) # 
+        exit()
     
     #print("timer time is", timer.get_time())
     print("tick time is", pygame.time.get_ticks())
