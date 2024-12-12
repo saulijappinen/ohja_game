@@ -2,6 +2,11 @@
 # Log / notes
 
 
+**12.12.**
+
+A little bit better dev version, class additions to monster and coin and a little bit clearer code. Time counting still not working, ended up in a wait version, not very classy. 
+
+
 
 **11.12.**
 

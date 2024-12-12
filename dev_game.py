@@ -1,5 +1,10 @@
 # dev game here 
 
+# metatxt for reviewer
+# - 
+# - 
+# - 
+
 import pygame
 from random import randint
 from random import choice
@@ -10,7 +15,7 @@ from random import choice
 # 1 Define classes 
 
 class Robot: 
-    def __init__(self, x: int, y:int):
+    def __init__(self, x: int, y:int, movement_speed: int = 1): 
         self.x = x
         self.y = y
         self.pic = pygame.image.load("./resources/robo.png")
@@ -19,6 +24,7 @@ class Robot:
         self.heigth = pygame.image.load("./resources/robo.png").get_height()
         self.center_x = self.x + self.width/2 
         self.center_y = self.y + self.heigth/2 
+        self.speed = movement_speed
  
     def draw(self, screen):
         screen.blit(self.pic, (self.x, self.y))        
@@ -61,6 +67,21 @@ class Door:
     def draw(self, screen):
         screen.blit(self.pic, (self.x, self.y))   
 
+class Coin:
+    def __init__(self):
+        self.pic = pygame.image.load("./resources/kolikko.png")
+        # for plotting
+        self.width = pygame.image.load("./resources/kolikko.png").get_width()
+        self.heigth = pygame.image.load("./resources/kolikko.png").get_height()
+        # using global parameters here, don't know if wise cause these have to be defined before 
+        self.x = randint(10, w_screen - self.pic.get_width() - 15)
+        self.y = randint(h_upper_banner + 10, h_screen - self.pic.get_height() - 15)
+        self.x_center = self.x + self.pic.get_width()/2 
+        self.y_center = self.y + self.pic.get_height()/2
+
+    def draw(self, screen):
+        screen.blit(self.pic, (self.x, self.y)) 
+
 
 # Functions
 
@@ -92,7 +113,7 @@ clock = pygame.time.Clock()
 
 rate_fps = 60
 
-point_max_points = 2
+point_max_points = 1
 
 ## how close to get to coins, monsters (abs)
 encounter_limit = 10
@@ -105,7 +126,7 @@ font = pygame.font.SysFont("Georgia", 20)
 ## upper banner height / for txt
 h_upper_banner = 35
 
-plain_text_monster = "Oh no! A monster stole your coin and possibly slowed you down!"
+plain_text_monster = "Oh no! A monster stole one coin and slowed you down!"
 plain_text_end_time = "Wuhuu! You mastered the game in"
 plain_text_monster_counter = "Scary monsters encountered during coin hunt:" 
 
@@ -117,8 +138,10 @@ plain_text_monster_counter = "Scary monsters encountered during coin hunt:"
 # w = randint(10, w_screen-100)
 # h = randint(h_upper_banner, h_screen-100)
 
+
+max_robo_speed = 3 # set max speed to be achieved by collecting coins // NOT SURE IF THE ROBOT IS ABLE TO FIND STUFF IF SPEED IS TOO HIGH!
 object_robo = Robot(0, h_upper_banner)
-rate_movement_robo = 2 
+
 
 rigth = False
 left = False
@@ -150,18 +173,20 @@ for _ in range(6): #
 
 ## 3.3 Coins
 
-coin = pygame.image.load("./resources/kolikko.png")
+#coin = pygame.image.load("./resources/kolikko.png")
 
 # x_coin = randint(0, 300)
 # y_coin = randint(0, 400)
 
 # coins not too near borders so robo can reach
-x_coin = randint(10, w_screen - coin.get_width() - 15)
-y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
+# x_coin = randint(10, w_screen - coin.get_width() - 15)
+# y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
 
-# for plotting 
-coin_center_x = x_coin + coin.get_width()/2
-coin_center_y = y_coin + coin.get_height()/2
+# # for plotting 
+# coin_center_x = x_coin + coin.get_width()/2
+# coin_center_y = y_coin + coin.get_height()/2
+
+object_coin = Coin() # the first coin here
 
 
 ## 3.4 Door 
@@ -196,14 +221,16 @@ monster_counter = 0
 elapsed_time = 0
 
 
-timer = pygame.time.Clock()
+
 # sys time and sys.time - start time and this would be visible 
 
 
 # time vars
+
+#timer = pygame.time.Clock()
 start_time = pygame.time.get_ticks()
 elapsed_time = 0
-game_finalized_time = 0
+#game_finalized_time = 0
 
 
 # functions: 
@@ -292,9 +319,10 @@ while True:
 
     # where to draw coins 
     if point_counter <= int(point_max_points - 1):
-        screen.blit(coin, (x_coin, y_coin))
-        coin_center_x = x_coin + coin.get_width()/2
-        coin_center_y = y_coin + coin.get_height()/2
+        object_coin.draw(screen) # when points 0, the first coin, created outside game loop 
+        # screen.blit(coin, (x_coin, y_coin))
+        # coin_center_x = x_coin + coin.get_width()/2
+        # coin_center_y = y_coin + coin.get_height()/2
 
 
 
@@ -303,37 +331,27 @@ while True:
     print("door location", object_door.x_center, object_door.y_center)
     print("robo is in location", object_robo.x, object_robo.y, "and its borders are", robot_border_right, robot_border_down)
     print("robo center", object_robo.x + object_robo.width/2, object_robo.y + object_robo.heigth/2)
-    print("coin center", coin_center_x, coin_center_y)
+    #print("coin center", coin_center_x, coin_center_y)
+    print("coin center", object_coin.x_center, object_coin.y_center)
     #print("monster location", object_monster.x, object_monster.y, "and center", object_monster.x + w_monster/2, object_monster.y + h_monster/2)
 
     # Coin found 
     # check_coin_encounter()
     # - 3 coord points offset ok from center 
-    if point_counter <= int(point_max_points - 1) and abs(object_robo.x + object_robo.width/2 - coin_center_x) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - coin_center_y)  <= encounter_limit:
+    if point_counter <= int(point_max_points - 1) and abs(object_robo.x + object_robo.width/2 - object_coin.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_coin.y_center)  <= encounter_limit:
         # screen.blit(text_coin_found, (200, h_screen/3))
         # pygame.display.flip() # update so that text is showing
         # pygame.time.wait(1000) # 
         point_counter += 1
-        x_coin = randint(10, w_screen - coin.get_width() - 15)
-        y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
-        # speed increase to 2
-        if rate_movement_robo == 1:
-            rate_movement_robo = 2
-
-    # Final coin collected, draw door object  
-    if point_counter == int(point_max_points):
-        object_door.draw(screen)
-
-
-    # Enter the door / only when point_conter is max points!
-    if point_counter == point_max_points and abs(point_counter == point_max_points and object_robo.x + object_robo.width/2 - object_door.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_door.y_center)  <= encounter_limit:
-        # stop all movement
-        game_finalized_time = pygame.time.get_ticks() - start_time
-        game_finalized = True 
-
+        # create new coin with new location
+        object_coin = Coin()
+        # x_coin = randint(10, w_screen - coin.get_width() - 15)
+        # y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
+        # speed increase
+        if object_robo.speed < max_robo_speed:
+            object_robo.speed += 1
 
     # Monster encounter 
-
     for mon in list_monsters_plotted: ## MUST BE FOR THOSE THAT HAVE BEEN PLOTTED, OTHERWISE THE COLLISION COMES WITH MONSTERS THAT NOT YET PLOTTED!
         
         if abs(object_robo.x + object_robo.width/2 - (mon.x + w_monster/2)) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - (mon.y + h_monster/2)) <= encounter_limit:
@@ -349,9 +367,13 @@ while True:
                 point_counter -= 1
             else: 
                 point_counter = 0
-            # decrease speed
-            if rate_movement_robo == 2:
-                rate_movement_robo = 1
+            # decrease speed / somehow decreases always to zero?
+            if object_robo.speed > 1:
+                object_robo.speed -= 1
+
+    # Final coin collected, draw door object  
+    if point_counter == int(point_max_points):
+        object_door.draw(screen)
             
         
 
@@ -364,6 +386,16 @@ while True:
 
 
         # prints on the screen depending on the game
+
+        # Enter the door / only when point_conter is max points!
+    if point_counter == point_max_points and abs(point_counter == point_max_points and object_robo.x + object_robo.width/2 - object_door.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_door.y_center)  <= encounter_limit:
+        # stop all movement
+        # current_time = timer.get_time() # time in milli seconds
+        # game_finalized_time = current_time - start_time 
+        #game_finalized_time = pygame.time.get_ticks() - start_time
+        game_finalized = True 
+
+    
 
     if game_finalized == False: 
         # Upper bar: point counter, time counter // could be converted to a surface? 
@@ -378,7 +410,7 @@ while True:
         text_timer = font.render(f"Seconds played: {gametime}", True, (0, 0, 0))
         screen.blit(text_timer, (275, 5))
         # speed 
-        text_robo_speed = font.render(f"Robo speed: {rate_movement_robo}", True, (0, 0, 0))
+        text_robo_speed = font.render(f"Robo speed: {object_robo.speed}", True, (0, 0, 0))
         screen.blit(text_robo_speed, (550, 5))
          
 
@@ -388,8 +420,8 @@ while True:
         if tapahtuma.type == pygame.QUIT:
             exit()
 
-        if game_finalized: 
-            game_finalized_time = pygame.time.get_ticks() - start_time
+        # if game_finalized: 
+        #     game_finalized_time = pygame.time.get_ticks() - start_time
  
         # Robo movement 
         if tapahtuma.type == pygame.KEYDOWN:
@@ -443,6 +475,8 @@ while True:
 
     if game_finalized == False:
 
+        rate_movement_robo = object_robo.speed
+
         if rigth and object_robo.x < (w_screen - object_robo.width):
             object_robo.move_rigth(rate_movement_robo) 
         if left and object_robo.x >= 0:
@@ -474,17 +508,23 @@ while True:
 
  
     if game_finalized:
-        # current_time = pygame.time.get_ticks()
-        # elapsed_time = current_time - start_time
+        #print("game finalize timer is", timer.get_time())
+        current_time = pygame.time.get_ticks()
+        game_finalized_time = round(float((current_time - start_time)/1000), 1) 
+        #game_finalized_time = round(float(current_time / -100), 1)
         #elapsed_time = round(float(pygame.time.get_ticks()/1000), 1) 
         text_end = font.render(f"{plain_text_end_time} {game_finalized_time} seconds", True, (255, 0, 0))
         screen.blit(text_end, (150, h_screen/3))
         text_monsters_encountered = font.render(f"{plain_text_monster_counter} {monster_counter}", True, (255, 0, 0))
         screen.blit(text_monsters_encountered, (150, h_screen/3 + 25))
+        # doing this in insane way because couldn't find a solution to stop the time from continuing to run
+        pygame.display.flip() # update so that text is showing
+        pygame.time.wait(5000) # 
     
-    # asiat peliin 
+    #print("timer time is", timer.get_time())
+    print("tick time is", pygame.time.get_ticks())
+    # changes
     pygame.display.flip()
- 
     # fps
     clock.tick(rate_fps)# dev game here 
 
