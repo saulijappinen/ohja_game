@@ -92,6 +92,52 @@ def init_screen(width, height):
     #screen.fill((0, 0, 0))
     return screen
 
+def check_coin_encounter():
+    global point_counter
+    global point_max_points
+    global object_robo
+    global encounter_limit
+    global object_coin
+    if point_counter <= int(point_max_points - 1) and abs(object_robo.x + object_robo.width/2 - object_coin.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_coin.y_center)  <= encounter_limit:
+        # screen.blit(text_coin_found, (200, h_screen/3))
+        # pygame.display.flip() # update so that text is showing
+        # pygame.time.wait(1000) # 
+        point_counter += 1
+        # create new coin with new location
+        object_coin = Coin()
+        # x_coin = randint(10, w_screen - coin.get_width() - 15)
+        # y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
+        # speed increase
+        if object_robo.speed < max_robo_speed:
+            object_robo.speed += 1
+        print("coin found")
+
+
+def check_monster_encounter(list_monsters):
+    global point_counter
+    global point_max_points
+    global object_robo
+    global encounter_limit
+    global object_coin
+    global monster_counter
+    for mon in list_monsters:
+        if abs(object_robo.x + object_robo.width/2 - (mon.x + w_monster/2)) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - (mon.y + h_monster/2)) <= encounter_limit:
+            print("monster encountered!")
+            text_monster = font.render(plain_text_monster, True, (255, 0, 0))
+            screen.blit(text_monster, (90, h_screen/3))
+            pygame.display.flip() # update so that text is showing
+            pygame.time.wait(2000) # 
+            # robot appears in upper corner 
+            object_robo = Robot(0, h_upper_banner + 5)
+            monster_counter += 1
+            if point_counter >= 1: 
+                point_counter -= 1
+            else: 
+                point_counter = 0
+            # decrease speed / somehow decreases always to zero?
+            if object_robo.speed > 1:
+                object_robo.speed -= 1
+
 
 # PART 0: init screen 
 
@@ -113,7 +159,7 @@ clock = pygame.time.Clock()
 
 rate_fps = 60
 
-point_max_points = 1
+point_max_points = 10
 
 ## how close to get to coins, monsters (abs)
 encounter_limit = 10
@@ -236,19 +282,6 @@ game_finalized_time = 0
 
 # functions: 
 
-# def check_coin_encounter(point_counter = point_counter, point_max_points = point_max_points, robot = object_robo, encounter_limit = encounter_limit):
-#     if point_counter <= int(point_max_points - 1) and abs(robot.x + robot.width/2 - coin_center_x) <= encounter_limit and abs(robot.y + robot.heigth/2 - coin_center_y)  <= encounter_limit:
-#         # screen.blit(text_coin_found, (200, h_screen/3))
-#         # pygame.display.flip() # update so that text is showing
-#         # pygame.time.wait(1000) # 
-#         point_counter += 1
-#         x_coin = randint(10, w_screen - coin.get_width() - 15)
-#         y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
-#         # speed increase to 2
-#         if rate_movement_robo == 1:
-#             rate_movement_robo = 2
-#         print("coin found")
-
 
 
 
@@ -339,38 +372,39 @@ while True:
     # Coin found 
     # check_coin_encounter()
     # - 3 coord points offset ok from center 
-    if point_counter <= int(point_max_points - 1) and abs(object_robo.x + object_robo.width/2 - object_coin.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_coin.y_center)  <= encounter_limit:
-        # screen.blit(text_coin_found, (200, h_screen/3))
-        # pygame.display.flip() # update so that text is showing
-        # pygame.time.wait(1000) # 
-        point_counter += 1
-        # create new coin with new location
-        object_coin = Coin()
-        # x_coin = randint(10, w_screen - coin.get_width() - 15)
-        # y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
-        # speed increase
-        if object_robo.speed < max_robo_speed:
-            object_robo.speed += 1
+    
+    # if point_counter <= int(point_max_points - 1) and abs(object_robo.x + object_robo.width/2 - object_coin.x_center) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - object_coin.y_center)  <= encounter_limit:
+    #     # screen.blit(text_coin_found, (200, h_screen/3))
+    #     # pygame.display.flip() # update so that text is showing
+    #     # pygame.time.wait(1000) # 
+    #     point_counter += 1
+    #     # create new coin with new location
+    #     object_coin = Coin()
+    #     # x_coin = randint(10, w_screen - coin.get_width() - 15)
+    #     # y_coin = randint(h_upper_banner + 10, h_screen - coin.get_height() - 15)
+    #     # speed increase
+    #     if object_robo.speed < max_robo_speed:
+    #         object_robo.speed += 1
 
     # Monster encounter 
-    for mon in list_monsters_plotted: ## MUST BE FOR THOSE THAT HAVE BEEN PLOTTED, OTHERWISE THE COLLISION COMES WITH MONSTERS THAT NOT YET PLOTTED!
+    # for mon in list_monsters_plotted: ## MUST BE FOR THOSE THAT HAVE BEEN PLOTTED, OTHERWISE THE COLLISION COMES WITH MONSTERS THAT NOT YET PLOTTED!
         
-        if abs(object_robo.x + object_robo.width/2 - (mon.x + w_monster/2)) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - (mon.y + h_monster/2)) <= encounter_limit:
-            print("monster encountered!")
-            text_monster = font.render(plain_text_monster, True, (255, 0, 0))
-            screen.blit(text_monster, (90, h_screen/3))
-            pygame.display.flip() # update so that text is showing
-            pygame.time.wait(2000) # 
-            # robot appears in upper corner 
-            object_robo = Robot(0, h_upper_banner + 5)
-            monster_counter += 1
-            if point_counter >= 1: 
-                point_counter -= 1
-            else: 
-                point_counter = 0
-            # decrease speed / somehow decreases always to zero?
-            if object_robo.speed > 1:
-                object_robo.speed -= 1
+    #     if abs(object_robo.x + object_robo.width/2 - (mon.x + w_monster/2)) <= encounter_limit and abs(object_robo.y + object_robo.heigth/2 - (mon.y + h_monster/2)) <= encounter_limit:
+    #         print("monster encountered!")
+    #         text_monster = font.render(plain_text_monster, True, (255, 0, 0))
+    #         screen.blit(text_monster, (90, h_screen/3))
+    #         pygame.display.flip() # update so that text is showing
+    #         pygame.time.wait(2000) # 
+    #         # robot appears in upper corner 
+    #         object_robo = Robot(0, h_upper_banner + 5)
+    #         monster_counter += 1
+    #         if point_counter >= 1: 
+    #             point_counter -= 1
+    #         else: 
+    #             point_counter = 0
+    #         # decrease speed / somehow decreases always to zero?
+    #         if object_robo.speed > 1:
+    #             object_robo.speed -= 1
 
     # Final coin collected, draw door object  
     if point_counter == int(point_max_points):
@@ -415,6 +449,8 @@ while True:
         text_robo_speed = font.render(f"Robo speed: {object_robo.speed}", True, (0, 0, 0))
         screen.blit(text_robo_speed, (550, 5))
          
+    check_coin_encounter()
+    check_monster_encounter(list_monsters_plotted)
 
     for tapahtuma in pygame.event.get():
 
@@ -507,7 +543,6 @@ while True:
                 mon.y += monster_speed
             elif monster_dir == "up": 
                 mon.y -= monster_speed
-
  
     if game_finalized:
         #print("game finalize timer is", timer.get_time())

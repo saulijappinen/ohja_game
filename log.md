@@ -1,10 +1,15 @@
 
 # Log / notes
 
+**21.12.**
+
+Game finalized, not perfect but maybe ok. Some functions added. 
+
 
 **12.12.**
 
 A little bit better dev version, class additions to monster and coin and a little bit clearer code. Time counting still not working, ended up in a wait version, not very classy. 
+
 
 
 
